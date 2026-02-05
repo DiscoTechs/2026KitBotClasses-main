@@ -1,10 +1,16 @@
+
+
 package frc.robot;
 
 import frc.robot.commands.AutoDrive;
+import frc.robot.commands.ExampleAuto;
 import frc.robot.commands.Intake;
+import frc.robot.commands.Launch;
+import frc.robot.commands.SpinUp;
 import frc.robot.subsystems.CANDriveSubsystem;
 import frc.robot.subsystems.CANFuelSubsystem;
 
+import static frc.robot.Constants.FuelConstants.INTAKING_FEEDER_VOLTAGE;
 import static frc.robot.Constants.FuelConstants.INTAKING_INTAKE_VOLTAGE;
 import static frc.robot.Constants.FuelConstants.SPIN_UP_SECONDS;
 
@@ -59,17 +65,37 @@ public class RobotContainer {
         )
     );
 
-    canFuelSubsystem.setDefaultCommand(new Intake(canFuelSubsystem));
+    //canFuelSubsystem.setDefaultCommand(new Intake(canFuelSubsystem));
   }
 
   // ================= BUTTON BINDINGS =================
   private void configureBindings() {
 
-    operatorController.leftBumper()
-      .whileTrue(canFuelSubsystem.runEnd(() -> canFuelSubsystem.setIntakeLauncherRoller(-INTAKING_INTAKE_VOLTAGE), () -> canFuelSubsystem.stop())); //from docs
+operatorController.leftBumper().whileTrue(
+    new Intake(canFuelSubsystem)
+);
 
-    //operatorController.rightBumper()`.whileTrue(canFuelSubsystem.spinUpCommand().withTmeout(SPIN_UP_SECONDS).andThen(canFuelSubsystem.LaunchCommand()).finallyDo(() -> fuelSubsystem.stop));  //from docs
 
+  
+  operatorController.leftBumper().whileTrue(
+    canFuelSubsystem.runEnd(
+      () -> {
+            canFuelSubsystem.setIntakeLauncherRoller(-INTAKING_INTAKE_VOLTAGE);
+            canFuelSubsystem.setFeederRoller(-INTAKING_FEEDER_VOLTAGE);
+        },
+        () -> canFuelSubsystem.stop()
+    )
+);
+  
+ //from docs
+
+operatorController.rightBumper().onTrue(
+    new SpinUp(canFuelSubsystem)
+        .withTimeout(SPIN_UP_SECONDS)
+        .andThen(new Launch(canFuelSubsystem))
+        .finallyDo(canFuelSubsystem::stop)
+);
+;
     // Hold RIGHT TRIGGER to use Limelight auto-centering + forward drive
     rightTrigger.whileTrue(
         canDriveSubsystem.run(() ->
@@ -81,6 +107,6 @@ public class RobotContainer {
 
   // ================= AUTONOMOUS =================
   public Command getAutonomousCommand() {
-    return null;
+    return new ExampleAuto(canDriveSubsystem, canFuelSubsystem);
   }
 }

@@ -21,8 +21,9 @@ public class CANFuelSubsystem extends SubsystemBase {
   /** Creates a new CANBallSubsystem. */
   public CANFuelSubsystem() {
     // create brushed motors for each of the motors on the launcher mechanism
-    intakeLauncherRoller = new SparkMax(INTAKE_LAUNCHER_MOTOR_ID, MotorType.kBrushed);
-    feederRoller = new SparkMax(FEEDER_MOTOR_ID, MotorType.kBrushed);
+    intakeLauncherRoller = new SparkMax(INTAKE_LAUNCHER_MOTOR_ID, MotorType.kBrushless);
+    feederRoller = new SparkMax(FEEDER_MOTOR_ID, MotorType.kBrushless);
+
 
     // create the configuration for the feeder roller, set a current limit and apply
     // the config to the controller
@@ -47,13 +48,13 @@ public class CANFuelSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Launching feeder roller value", LAUNCHING_FEEDER_VOLTAGE);
     SmartDashboard.putNumber("Launching launcher roller value", LAUNCHING_LAUNCHER_VOLTAGE);
     SmartDashboard.putNumber("Spin-up feeder roller value", SPIN_UP_FEEDER_VOLTAGE);
- System.out.println("configure");
+    System.out.println("configure");
   }
 
   // A method to set the voltage of the intake roller
   public void setIntakeLauncherRoller(double voltage) {
     intakeLauncherRoller.setVoltage(voltage);
-  System.out.println("voltage intake ");
+    System.out.println("voltage intake ");
   }
 
   // A method to set the voltage of the intake roller
@@ -66,7 +67,7 @@ public class CANFuelSubsystem extends SubsystemBase {
   public void stop() {
     feederRoller.set(0);  //originaly 0
     intakeLauncherRoller.set(0);// originaly 0
-  System.out.println("speed roller");
+    System.out.println("speed roller");
   }
 
   @Override
