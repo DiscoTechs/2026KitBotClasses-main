@@ -1,3 +1,4 @@
+
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
@@ -16,6 +17,9 @@ import frc.robot.LimelightHelpers;
 
 import static frc.robot.Constants.DriveConstants.*;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
+
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class CANDriveSubsystem extends SubsystemBase {
   private final SparkMax leftLeader;
@@ -95,10 +99,83 @@ public class CANDriveSubsystem extends SubsystemBase {
 
     double turn = tx * kTurn;
 
-    drive.arcadeDrive(forwardSpeed, -turn);
+    drive.arcadeDrive(forwardSpeed, turn);
 
   }
 
 
-  
+
+public void limelightDriveReverse() {
+    double tx = NetworkTableInstance.getDefault()
+        .getTable("limelight")
+        .getEntry("tx")
+        .getDouble(0);
+
+    double kP = 0.03;   // tune later
+    double turn = -tx * kP;
+
+    driveArcade(-0.4, turn);
+}
+
+
+
+public void limelightHoldNineFeet() {
+    var table = NetworkTableInstance.getDefault().getTable("limelight");
+
+    // Check target valid
+    double tv = table.getEntry("tv").getDouble(0);
+    if (tv != 1) {
+        driveArcade(0, 0);
+        return;
+    }
+
+    // Distance to tag (meters)
+    double[] botPose = table.getEntry("botpose_wpiblue").getDoubleArray(new double[6]);
+    double distanceMeters = botPose[2];
+
+    // Constants
+    double targetMeters = 2.7432; // 9 feet
+    double tolerance = 0.05;      // ~2 inches
+    double kP = 0.8;              // distance gain
+    double maxSpeed = 0.4;
+
+    // Distance control
+    double error = targetMeters - distanceMeters;
+    double forward = error * kP;
+
+    // Deadband (stop exactly at 9 ft)
+    if (Math.abs(error) < tolerance) {
+        forward = 0;
+    }
+
+    // Clamp speed
+    forward = Math.max(-maxSpeed, Math.min(maxSpeed, forward));
+
+    // Steering (tx)
+    double tx = table.getEntry("tx").getDouble(0);
+    double turn = -tx * 0.03;
+
+    driveArcade(forward, turn);
+}
+
+
+
+
+
+public boolean shouldRunLimelightForTags() {
+    double tv = NetworkTableInstance.getDefault()
+        .getTable("limelight")
+        .getEntry("tv")
+        .getDouble(0);
+
+    if (tv != 1) return false;
+
+    int tagId = (int) NetworkTableInstance.getDefault()
+        .getTable("limelight")
+        .getEntry("tid")
+        .getDouble(-1);
+
+    return tagId == 10 || tagId == 25;
+}
+
 }

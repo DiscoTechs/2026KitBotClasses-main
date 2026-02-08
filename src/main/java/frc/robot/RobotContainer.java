@@ -24,6 +24,10 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
+import limelight.Limelight;
+
+import edu.wpi.first.networktables.NetworkTableInstance;
+
 public class RobotContainer {
 
 
@@ -102,16 +106,24 @@ operatorController.rightBumper().onTrue(
 );
 
     // Hold RIGHT TRIGGER to use Limelight auto-centering + forward drive
-    rightTrigger.whileTrue(
-        canDriveSubsystem.run(() ->
-        
-            canDriveSubsystem.limelightDrive()
-        )
-    );
-  }
-
+   
+ rightTrigger.whileTrue(
+    canDriveSubsystem.run(() -> {
+        if (canDriveSubsystem.shouldRunLimelightForTags()) {
+            canDriveSubsystem.limelightHoldNineFeet();
+        } else {
+            canDriveSubsystem.driveArcade(0, 0);
+        }
+    })
+);
+}
   // ================= AUTONOMOUS =================
   public Command getAutonomousCommand() {
     return new ExampleAuto(canDriveSubsystem, canFuelSubsystem);
   }
+
+
+
+
+
 }
