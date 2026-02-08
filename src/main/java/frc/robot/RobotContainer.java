@@ -9,7 +9,9 @@ import frc.robot.commands.Launch;
 import frc.robot.commands.SpinUp;
 import frc.robot.subsystems.CANDriveSubsystem;
 import frc.robot.subsystems.CANFuelSubsystem;
+//import frc.robot.subsystems.ShooterSubsystem;
 
+import static edu.wpi.first.units.Units.RPM;
 import static frc.robot.Constants.FuelConstants.INTAKING_FEEDER_VOLTAGE;
 import static frc.robot.Constants.FuelConstants.INTAKING_INTAKE_VOLTAGE;
 import static frc.robot.Constants.FuelConstants.SPIN_UP_SECONDS;
@@ -32,6 +34,7 @@ public class RobotContainer {
   private final CANDriveSubsystem canDriveSubsystem =
       new CANDriveSubsystem();
   private final CANFuelSubsystem canFuelSubsystem = new CANFuelSubsystem();
+  //private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
 
   // ================= CONTROLLERS =================
  //driver
@@ -71,6 +74,9 @@ public class RobotContainer {
   // ================= BUTTON BINDINGS =================
   private void configureBindings() {
 
+    // operatorController.rightTrigger().onTrue(Commands.runOnce(() -> shooterSubsystem.setVelocity(RPM.of(1000))));
+    // operatorController.rightTrigger().onFalse(Commands.runOnce(() -> shooterSubsystem.setVelocity(RPM.of(0))));
+
 operatorController.leftBumper().whileTrue(
     new Intake(canFuelSubsystem)
 );
@@ -79,7 +85,7 @@ operatorController.leftBumper().whileTrue(
   
   operatorController.leftBumper().whileTrue(
     canFuelSubsystem.runEnd(
-      () -> {
+        () -> {
             canFuelSubsystem.setIntakeLauncherRoller(-INTAKING_INTAKE_VOLTAGE);
             canFuelSubsystem.setFeederRoller(-INTAKING_FEEDER_VOLTAGE);
         },
@@ -87,7 +93,6 @@ operatorController.leftBumper().whileTrue(
     )
 );
   
- //from docs
 
 operatorController.rightBumper().onTrue(
     new SpinUp(canFuelSubsystem)
@@ -95,7 +100,7 @@ operatorController.rightBumper().onTrue(
         .andThen(new Launch(canFuelSubsystem))
         .finallyDo(canFuelSubsystem::stop)
 );
-;
+
     // Hold RIGHT TRIGGER to use Limelight auto-centering + forward drive
     rightTrigger.whileTrue(
         canDriveSubsystem.run(() ->
